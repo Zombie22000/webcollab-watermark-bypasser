@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    /* make page and iframe fill the viewport, no scroll, no background */
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: transparent;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      overscroll-behavior: none;
+    }
+    iframe#proj-frame {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      margin: 0;
+      padding: 0;
+      display: block;
+      background: transparent;
+    }
+  </style>
+</head>
+<body>
+  <iframe 
+    id="proj-frame" 
+    sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-pointer-lock" 
+    allow="pointer-lock; fullscreen; autoplay; clipboard-write; camera; microphone; gamepad; accelerometer; gyroscope; xr-spatial-tracking" 
+    src="about:blank"
+    title="project frame"
+    frameborder="0"
+    scrolling="no"
+    allowtransparency="true">
+  </iframe>
+
+  <script>
+    (function(){
+      function getParam(name) {
+        const params = new URLSearchParams(window.location.search);
+        return params.get(name);
+      }
+      const raw = getParam('url');
+      const iframe = document.getElementById('proj-frame');
+      if (!iframe) return;
+      if (raw) {
+        try {
+          const decoded = decodeURIComponent(raw);
+          // Basic validation: allow only http/https/data/about (prevent javascript:)
+          if (/^(https?:\/\/|about:|data:)/i.test(decoded)) {
+            iframe.src = decoded;
+          } else {
+            // If no scheme, try adding https://
+            iframe.src = 'https://' + decoded;
+          }
+        } catch (e) {
+          // fallback if decode fails
+          iframe.src = raw;
+        }
+      } else {
+        iframe.src = 'about:blank';
+      }
+      // Ensure iframe always matches viewport on resize (defensive)
+      function fit() {
+        iframe.style.width = window.innerWidth + 'px';
+        iframe.style.height = window.innerHeight + 'px';
+      }
+      window.addEventListener('resize', fit, {passive:true});
+      fit();
+    })();
+  </script>
+</body>
+</html>
